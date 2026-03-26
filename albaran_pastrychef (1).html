@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Albarán Digital – Pastrychef</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --rose:    #f4c2c2;
+    --rose-dk: #e8a0a0;
+    --cream:   #fdf6ef;
+    --parchment: #f9ede0;
+    --ink:     #2c1a0e;
+    --ink-lt:  #5c3d2e;
+    --accent:  #c0392b;
+    --gold:    #c9843c;
+    --border:  #d4a57a;
+    --ok:      #2d7a4f;
+    --shadow:  rgba(44,26,14,.12);
+    --r: 10px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+    padding-bottom: 120px;
+    background-image:
+      radial-gradient(ellipse at 80% 0%, #f9e8d8 0%, transparent 60%),
+      radial-gradient(ellipse at 10% 90%, #fce4d4 0%, transparent 50%);
+  }
+
+  /* ── CONFIG BANNER ─────────────────────────────────── */
+  #config-banner {
+    background: #fff3cd;
+    border-bottom: 2px solid var(--gold);
+    padding: 10px 16px;
+    font-size: 12px;
+    color: #6b4c00;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  #config-banner span { font-weight: 600; }
+  #webhook-input {
+    flex: 1;
+    min-width: 220px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-family: monospace;
+    font-size: 11px;
+    background: #fffdf5;
+    color: var(--ink);
+  }
+  #save-webhook {
+    background: var(--gold);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  #save-webhook:hover { background: #a8692d; }
+
+  /* ── HEADER ─────────────────────────────────────────── */
+  header {
+    background: linear-gradient(135deg, var(--rose) 0%, var(--rose-dk) 100%);
+    border-bottom: 3px solid var(--border);
+    padding: 20px 16px 16px;
+    text-align: center;
+    position: relative;
+  }
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 0; right: 0;
+    height: 4px;
+    background: repeating-linear-gradient(90deg, var(--gold) 0, var(--gold) 8px, transparent 8px, transparent 16px);
+  }
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: .5px;
+  }
+  .logo span { color: var(--gold); }
+  .address {
+    font-size: 11px;
+    color: var(--ink-lt);
+    margin-top: 2px;
+    letter-spacing: .3px;
+  }
+
+  /* ── CLIENT INFO ────────────────────────────────────── */
+  .client-card {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: var(--r);
+    margin: 14px 12px 0;
+    padding: 14px;
+    box-shadow: 0 2px 8px var(--shadow);
+  }
+  .client-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 13px;
+    color: var(--gold);
+    letter-spacing: .8px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    border-bottom: 1px solid var(--rose);
+    padding-bottom: 6px;
+  }
+  .client-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .client-row .full { grid-column: 1 / -1; }
+  label.field {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-lt);
+    letter-spacing: .4px;
+    text-transform: uppercase;
+  }
+  label.field input {
+    border: 1.5px solid #e0cbb8;
+    border-radius: 6px;
+    padding: 7px 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--ink);
+    background: var(--parchment);
+    transition: border-color .2s;
+  }
+  label.field input:focus { outline: none; border-color: var(--gold); }
+
+  /* ── SECTION ────────────────────────────────────────── */
+  .section {
+    margin: 14px 12px 0;
+    border-radius: var(--r);
+    overflow: hidden;
+    border: 1.5px solid var(--border);
+    box-shadow: 0 2px 8px var(--shadow);
+  }
+  .section-title {
+    background: linear-gradient(90deg, var(--rose-dk), var(--rose));
+    padding: 9px 14px;
+    font-family: 'Playfair Display', serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: .6px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .section-title .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--gold);
+    flex-shrink: 0;
+  }
+
+  /* two-col grid inside a section */
+  .products-grid {
+    background: #fff;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .products-grid.single { grid-template-columns: 1fr; }
+  .products-grid.three  { grid-template-columns: 1fr 1fr 1fr; }
+
+  /* ── PRODUCT ROW ────────────────────────────────────── */
+  .product {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 12px;
+    border-bottom: 1px solid #f3e8dd;
+    transition: background .15s;
+  }
+  .product:hover { background: var(--parchment); }
+  .product:last-child { border-bottom: none; }
+  .product-name {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--ink);
+    line-height: 1.3;
+  }
+  .product-name .badge {
+    display: inline-block;
+    background: var(--rose);
+    color: var(--ink-lt);
+    font-size: 10px;
+    padding: 1px 5px;
+    border-radius: 4px;
+    margin-left: 4px;
+    font-weight: 600;
+  }
+  .qty-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    flex-shrink: 0;
+  }
+  .qty-label {
+    font-size: 9px;
+    color: var(--ink-lt);
+    letter-spacing: .3px;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  input.qty {
+    width: 54px;
+    border: 1.5px solid #ddc9b4;
+    border-radius: 6px;
+    padding: 5px 4px;
+    text-align: center;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+    background: var(--parchment);
+    transition: border-color .2s, background .2s;
+    -moz-appearance: textfield;
+  }
+  input.qty::-webkit-inner-spin-button,
+  input.qty::-webkit-outer-spin-button { -webkit-appearance: none; }
+  input.qty:focus { outline: none; border-color: var(--gold); background: #fff; }
+  input.qty.filled {
+    border-color: var(--ok);
+    background: #edfaf3;
+    color: var(--ok);
+    font-weight: 700;
+  }
+  /* Campo HOY – tono azul grisáceo para distinguirlo de Mañana */
+  input.qty.hoy {
+    background: #eef3f8;
+    border-color: #a8bdd1;
+    color: #3a5a78;
+  }
+  input.qty.hoy:focus { border-color: #4a82b0; background: #f0f6fc; }
+  input.qty.hoy.filled {
+    border-color: #4a82b0;
+    background: #ddeeff;
+    color: #1e4d78;
+    font-weight: 700;
+  }
+  .qty-label.hoy-lbl { color: #4a82b0; }
+
+  /* separator between columns */
+  .products-grid > .product:nth-child(2n-1) {
+    border-right: 1px dashed #e0cbb8;
+  }
+
+  /* ── NOTES ──────────────────────────────────────────── */
+  .notes-wrap {
+    margin: 14px 12px 0;
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: var(--r);
+    overflow: hidden;
+    box-shadow: 0 2px 8px var(--shadow);
+  }
+  .notes-wrap .section-title { background: linear-gradient(90deg,#e8d8cc,#f0e4d8); }
+  textarea.notes {
+    width: 100%;
+    border: none;
+    padding: 10px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--ink);
+    background: var(--parchment);
+    resize: vertical;
+    min-height: 70px;
+  }
+  textarea.notes:focus { outline: none; }
+
+  /* ── STICKY FOOTER ──────────────────────────────────── */
+  .sticky-footer {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: #fff;
+    border-top: 2px solid var(--border);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    box-shadow: 0 -4px 20px var(--shadow);
+    z-index: 100;
+  }
+  .order-summary {
+    font-size: 12px;
+    color: var(--ink-lt);
+    line-height: 1.5;
+  }
+  .order-summary strong {
+    font-size: 16px;
+    color: var(--ink);
+    display: block;
+  }
+  .btn-confirm {
+    background: linear-gradient(135deg, var(--accent) 0%, #9b1a10 100%);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 14px 22px;
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: .5px;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(192,57,43,.35);
+    transition: transform .15s, box-shadow .15s;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-confirm:hover  { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(192,57,43,.4); }
+  .btn-confirm:active { transform: translateY(1px); }
+  .btn-confirm:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
+  /* ── TOAST ──────────────────────────────────────────── */
+  #toast {
+    position: fixed;
+    top: 20px; left: 50%;
+    transform: translateX(-50%) translateY(-80px);
+    background: var(--ok);
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 14px;
+    box-shadow: 0 4px 20px rgba(0,0,0,.2);
+    transition: transform .35s cubic-bezier(.22,1,.36,1);
+    z-index: 999;
+    text-align: center;
+    max-width: 90vw;
+  }
+  #toast.error { background: var(--accent); }
+  #toast.show  { transform: translateX(-50%) translateY(0); }
+
+  /* ── LOADER ─────────────────────────────────────────── */
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,.4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── MISC ───────────────────────────────────────────── */
+  .divider {
+    margin: 18px 12px 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+  }
+  .section-pair {
+    margin: 14px 12px 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .section-pair .section { margin: 0; }
+  @media (max-width: 520px) {
+    .section-pair { grid-template-columns: 1fr; }
+    .products-grid { grid-template-columns: 1fr; }
+    .products-grid > .product:nth-child(2n-1) { border-right: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── CONFIG BANNER ── -->
+<div id="config-banner">
+  <span>🔗 Webhook n8n:</span>
+  <input id="webhook-input" type="url" placeholder="https://tu-n8n.com/webhook/pastrychef-pedidos" />
+  <button id="save-webhook" onclick="saveWebhook()">Guardar</button>
+  <span id="wh-status" style="font-size:11px;color:#2d7a4f;display:none">✓ Guardado</span>
+</div>
+
+<!-- ── HEADER ── -->
+<header>
+  <div class="logo">Pastry<span>chef</span></div>
+  <div class="address">C/. Antonio Machado, 23 · Tlf. 95 401 32 76 · 41567 HERRERA (Sevilla)</div>
+</header>
+
+<!-- ── CLIENT INFO ── -->
+<div class="client-card">
+  <h3>📋 Datos del pedido</h3>
+  <div class="client-row">
+    <label class="field full">
+      Cliente
+      <input type="text" id="cliente" placeholder="Nombre del cliente" />
+    </label>
+    <label class="field">
+      Código
+      <input type="text" id="codigo" placeholder="Ej. 6-11-C5" />
+    </label>
+    <label class="field">
+      Fecha entrega
+      <input type="date" id="fecha" />
+    </label>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     PASTELES SURTIDOS A
+══════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title"><span class="dot"></span>Pasteles Surtidos A</div>
+  <div class="products-grid" id="grid-A">
+    <!-- col 1 -->
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Napolitanas" data-sec="Pasteles A" placeholder="0"></div><span class="product-name">Napolitanas</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Napolitanas" data-sec="Pasteles A" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="San Marcos" data-sec="Pasteles A" placeholder="0"></div><span class="product-name">San Marcos</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="San Marcos" data-sec="Pasteles A" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Mojamas" data-sec="Pasteles A" placeholder="0"></div><span class="product-name">Mojamas</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Mojamas" data-sec="Pasteles A" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Palos Nata" data-sec="Pasteles A" placeholder="0"></div><span class="product-name">Palos Nata</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Palos Nata" data-sec="Pasteles A" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Pirámides" data-sec="Pasteles A" placeholder="0"></div><span class="product-name">Pirámides</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Pirámides" data-sec="Pasteles A" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Tartitas Nueces" data-sec="Pasteles A" placeholder="0"></div><span class="product-name">Tartitas Nueces</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Tartitas Nueces" data-sec="Pasteles A" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Croissant" data-sec="Pasteles A" placeholder="0"></div><span class="product-name">Croissant</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Croissant" data-sec="Pasteles A" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Cecilianos" data-sec="Pasteles A" placeholder="0"></div><span class="product-name">Cecilianos</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Cecilianos" data-sec="Pasteles A" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Conos de Nata" data-sec="Pasteles A" placeholder="0"></div><span class="product-name">Conos de Nata</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Conos de Nata" data-sec="Pasteles A" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Tocino de Cielo" data-sec="Pasteles A" placeholder="0"></div><span class="product-name">Tocino de Cielo</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Tocino de Cielo" data-sec="Pasteles A" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Trenzas Hojaldre" data-sec="Pasteles A" placeholder="0"></div><span class="product-name">Trenzas Hojaldre</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Trenzas Hojaldre" data-sec="Pasteles A" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="San Hoja" data-sec="Pasteles A" placeholder="0"></div><span class="product-name">San Hoja</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="San Hoja" data-sec="Pasteles A" placeholder="0"></div></div>
+    <!-- col 2 -->
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Caracola" data-sec="Pasteles A" placeholder="0"></div><span class="product-name">Caracola</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Caracola" data-sec="Pasteles A" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Pudín" data-sec="Pasteles A" placeholder="0"></div><span class="product-name">Pudín</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Pudín" data-sec="Pasteles A" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Palmeras Kinder" data-sec="Pasteles A" placeholder="0"></div><span class="product-name">Palmeras Kinder</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Palmeras Kinder" data-sec="Pasteles A" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Milhojas Merengue" data-sec="Pasteles A" placeholder="0"></div><span class="product-name">Milhojas Merengue</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Milhojas Merengue" data-sec="Pasteles A" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Milhojas Chocolate" data-sec="Pasteles A" placeholder="0"></div><span class="product-name">Milhojas Chocolate</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Milhojas Chocolate" data-sec="Pasteles A" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Piononos sin Azúcar" data-sec="Pasteles A" placeholder="0"></div><span class="product-name">Piononos sin Azúcar</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Piononos sin Azúcar" data-sec="Pasteles A" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Borrachos" data-sec="Pasteles A" placeholder="0"></div><span class="product-name">Borrachos</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Borrachos" data-sec="Pasteles A" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Cañas Chocolate" data-sec="Pasteles A" placeholder="0"></div><span class="product-name">Cañas Chocolate</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Cañas Chocolate" data-sec="Pasteles A" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Pastel Cordobés" data-sec="Pasteles A" placeholder="0"></div><span class="product-name">Pastel Cordobés</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Pastel Cordobés" data-sec="Pasteles A" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Berlinas" data-sec="Pasteles A" placeholder="0"></div><span class="product-name">Berlinas</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Berlinas" data-sec="Pasteles A" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Delicias de Hojaldre" data-sec="Pasteles A" placeholder="0"></div><span class="product-name">Delicias de Hojaldre</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Delicias de Hojaldre" data-sec="Pasteles A" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Tarta Santiago" data-sec="Pasteles A" placeholder="0"></div><span class="product-name">Tarta Santiago</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Tarta Santiago" data-sec="Pasteles A" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Empanada" data-sec="Pasteles A" placeholder="0"></div><span class="product-name">Empanada</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Empanada" data-sec="Pasteles A" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Tarta Charlota" data-sec="Pasteles A" placeholder="0"></div><span class="product-name">Tarta Charlota</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Tarta Charlota" data-sec="Pasteles A" placeholder="0"></div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     PASTELES SURTIDOS B
+══════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title"><span class="dot"></span>Pasteles Surtidos B</div>
+  <div class="products-grid">
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Tartitas" data-sec="Pasteles B" placeholder="0"></div><span class="product-name">Tartitas</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Tartitas" data-sec="Pasteles B" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Palos" data-sec="Pasteles B" placeholder="0"></div><span class="product-name">Palos</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Palos" data-sec="Pasteles B" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="R. Gachas" data-sec="Pasteles B" placeholder="0"></div><span class="product-name">R. Gachas</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="R. Gachas" data-sec="Pasteles B" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Cortadillos" data-sec="Pasteles B" placeholder="0"></div><span class="product-name">Cortadillos</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Cortadillos" data-sec="Pasteles B" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="C. Coco" data-sec="Pasteles B" placeholder="0"></div><span class="product-name">C. Coco</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="C. Coco" data-sec="Pasteles B" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Milhojas B." data-sec="Pasteles B" placeholder="0"></div><span class="product-name">Milhojas B.</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Milhojas B." data-sec="Pasteles B" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Milhojas H." data-sec="Pasteles B" placeholder="0"></div><span class="product-name">Milhojas H.</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Milhojas H." data-sec="Pasteles B" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Bizcocho Yema" data-sec="Pasteles B" placeholder="0"></div><span class="product-name">Bizcocho Yema</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Bizcocho Yema" data-sec="Pasteles B" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Brazos Moka" data-sec="Pasteles B" placeholder="0"></div><span class="product-name">Brazos Moka</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Brazos Moka" data-sec="Pasteles B" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Piononos" data-sec="Pasteles B" placeholder="0"></div><span class="product-name">Piononos</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Piononos" data-sec="Pasteles B" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Brazos Yema" data-sec="Pasteles B" placeholder="0"></div><span class="product-name">Brazos Yema</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Brazos Yema" data-sec="Pasteles B" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Brazos Chocolate" data-sec="Pasteles B" placeholder="0"></div><span class="product-name">Brazos Chocolate</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Brazos Chocolate" data-sec="Pasteles B" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Hojaldres" data-sec="Pasteles B" placeholder="0"></div><span class="product-name">Hojaldres</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Hojaldres" data-sec="Pasteles B" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Albañiles" data-sec="Pasteles B" placeholder="0"></div><span class="product-name">Albañiles</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Albañiles" data-sec="Pasteles B" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Palmeras Hojaldre" data-sec="Pasteles B" placeholder="0"></div><span class="product-name">Palmeras Hojaldre</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Palmeras Hojaldre" data-sec="Pasteles B" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Tetas" data-sec="Pasteles B" placeholder="0"></div><span class="product-name">Tetas</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Tetas" data-sec="Pasteles B" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Xuxos" data-sec="Pasteles B" placeholder="0"></div><span class="product-name">Xuxos</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Xuxos" data-sec="Pasteles B" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Alpargatas" data-sec="Pasteles B" placeholder="0"></div><span class="product-name">Alpargatas</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Alpargatas" data-sec="Pasteles B" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Bollos" data-sec="Pasteles B" placeholder="0"></div><span class="product-name">Bollos</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Bollos" data-sec="Pasteles B" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Picos" data-sec="Pasteles B" placeholder="0"></div><span class="product-name">Picos</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Picos" data-sec="Pasteles B" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Pitisú Caramelo" data-sec="Pasteles B" placeholder="0"></div><span class="product-name">Pitisú Caramelo</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Pitisú Caramelo" data-sec="Pasteles B" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Cañas" data-sec="Pasteles B" placeholder="0"></div><span class="product-name">Cañas</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Cañas" data-sec="Pasteles B" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Timbre de Crema" data-sec="Pasteles B" placeholder="0"></div><span class="product-name">Timbre de Crema</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Timbre de Crema" data-sec="Pasteles B" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Picos Chocolate" data-sec="Pasteles B" placeholder="0"></div><span class="product-name">Picos Chocolate</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Picos Chocolate" data-sec="Pasteles B" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Torrijas" data-sec="Pasteles B" placeholder="0"></div><span class="product-name">Torrijas</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Torrijas" data-sec="Pasteles B" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Yemas" data-sec="Pasteles B" placeholder="0"></div><span class="product-name">Yemas</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Yemas" data-sec="Pasteles B" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Lenguas" data-sec="Pasteles B" placeholder="0"></div><span class="product-name">Lenguas</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Lenguas" data-sec="Pasteles B" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Garrapiñadas" data-sec="Pasteles B" placeholder="0"></div><span class="product-name">Garrapiñadas</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Garrapiñadas" data-sec="Pasteles B" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Bizcocho Nueces" data-sec="Pasteles B" placeholder="0"></div><span class="product-name">Bizcocho Nueces</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Bizcocho Nueces" data-sec="Pasteles B" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Trufas" data-sec="Pasteles B" placeholder="0"></div><span class="product-name">Trufas</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Trufas" data-sec="Pasteles B" placeholder="0"></div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     ESPECIALES
+══════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title"><span class="dot"></span>Especiales</div>
+  <div class="products-grid">
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="San N y Trufa" data-sec="Especiales" placeholder="0"></div><span class="product-name">San N y Trufa</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="San N y Trufa" data-sec="Especiales" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Tarta de Chocolate" data-sec="Especiales" placeholder="0"></div><span class="product-name">Tarta de Chocolate</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Tarta de Chocolate" data-sec="Especiales" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Tarta de Fresa" data-sec="Especiales" placeholder="0"></div><span class="product-name">Tarta de Fresa</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Tarta de Fresa" data-sec="Especiales" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Tarta Manzana" data-sec="Especiales" placeholder="0"></div><span class="product-name">Tarta Manzana</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Tarta Manzana" data-sec="Especiales" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="B. Chocolate" data-sec="Especiales" placeholder="0"></div><span class="product-name">B. Chocolate</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="B. Chocolate" data-sec="Especiales" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Comadritos" data-sec="Especiales" placeholder="0"></div><span class="product-name">Comadritos</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Comadritos" data-sec="Especiales" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Berlinas Kinder" data-sec="Especiales" placeholder="0"></div><span class="product-name">Berlinas Kinder</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Berlinas Kinder" data-sec="Especiales" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Postre de Turrón" data-sec="Especiales" placeholder="0"></div><span class="product-name">Postre de Turrón</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Postre de Turrón" data-sec="Especiales" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Postres de Fresas" data-sec="Especiales" placeholder="0"></div><span class="product-name">Postres de Fresas</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Postres de Fresas" data-sec="Especiales" placeholder="0"></div></div>
+    <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Merengazos" data-sec="Especiales" placeholder="0"></div><span class="product-name">Merengazos</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Merengazos" data-sec="Especiales" placeholder="0"></div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     TARTAS SINTRO + TART. TROCEAD
+══════════════════════════════════════════════════════ -->
+<div class="section-pair">
+  <div class="section">
+    <div class="section-title" style="font-size:11px"><span class="dot"></span>Tartas Sintro</div>
+    <div class="products-grid single">
+      <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Trufa" data-sec="Tartas Sintro" placeholder="0"></div><span class="product-name">Trufa</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Trufa" data-sec="Tartas Sintro" placeholder="0"></div></div>
+      <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="San Marcos Tarta" data-sec="Tartas Sintro" placeholder="0"></div><span class="product-name">San Marcos</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="San Marcos Tarta" data-sec="Tartas Sintro" placeholder="0"></div></div>
+      <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Nata" data-sec="Tartas Sintro" placeholder="0"></div><span class="product-name">Nata</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Nata" data-sec="Tartas Sintro" placeholder="0"></div></div>
+      <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Turrón" data-sec="Tartas Sintro" placeholder="0"></div><span class="product-name">Turrón</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Turrón" data-sec="Tartas Sintro" placeholder="0"></div></div>
+      <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Tarta de Frutas" data-sec="Tartas Sintro" placeholder="0"></div><span class="product-name">Tarta de Frutas</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Tarta de Frutas" data-sec="Tartas Sintro" placeholder="0"></div></div>
+      <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Cardinali" data-sec="Tartas Sintro" placeholder="0"></div><span class="product-name">Cardinali</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Cardinali" data-sec="Tartas Sintro" placeholder="0"></div></div>
+      <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Bandeja Mini" data-sec="Tartas Sintro" placeholder="0"></div><span class="product-name">Bandeja Mini</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Bandeja Mini" data-sec="Tartas Sintro" placeholder="0"></div></div>
+      <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Torta de Aceite" data-sec="Tartas Sintro" placeholder="0"></div><span class="product-name">Torta de Aceite</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Torta de Aceite" data-sec="Tartas Sintro" placeholder="0"></div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title" style="font-size:11px"><span class="dot"></span>Tart. Trocead.</div>
+    <div class="products-grid single">
+      <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Trufa Trocead." data-sec="Tartas Troceadas" placeholder="0"></div><span class="product-name">Trufa</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Trufa Trocead." data-sec="Tartas Troceadas" placeholder="0"></div></div>
+      <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="San Marcos Trocead." data-sec="Tartas Troceadas" placeholder="0"></div><span class="product-name">San Marcos</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="San Marcos Trocead." data-sec="Tartas Troceadas" placeholder="0"></div></div>
+      <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Nata Trocead." data-sec="Tartas Troceadas" placeholder="0"></div><span class="product-name">Nata</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Nata Trocead." data-sec="Tartas Troceadas" placeholder="0"></div></div>
+      <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Turrón Trocead." data-sec="Tartas Troceadas" placeholder="0"></div><span class="product-name">Turrón</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Turrón Trocead." data-sec="Tartas Troceadas" placeholder="0"></div></div>
+      <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Brownie" data-sec="Tartas Troceadas" placeholder="0"></div><span class="product-name">Brownie</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Brownie" data-sec="Tartas Troceadas" placeholder="0"></div></div>
+      <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="S. Honoré" data-sec="Tartas Troceadas" placeholder="0"></div><span class="product-name">S. Honoré</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="S. Honoré" data-sec="Tartas Troceadas" placeholder="0"></div></div>
+      <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Postres Niño" data-sec="Tartas Troceadas" placeholder="0"></div><span class="product-name">Postres Niño</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Postres Niño" data-sec="Tartas Troceadas" placeholder="0"></div></div>
+      <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="4 Leches" data-sec="Tartas Troceadas" placeholder="0"></div><span class="product-name">4 Leches</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="4 Leches" data-sec="Tartas Troceadas" placeholder="0"></div></div>
+      <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Blueberry" data-sec="Tartas Troceadas" placeholder="0"></div><span class="product-name">Blueberry</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Blueberry" data-sec="Tartas Troceadas" placeholder="0"></div></div>
+      <div class="product"><div class="qty-wrap"><span class="qty-label" style="color:#4a82b0">Hoy</span><input class="qty hoy" type="number" min="0" data-product="Voy x Dos" data-sec="Tartas Troceadas" placeholder="0"></div><span class="product-name">Voy x Dos</span><div class="qty-wrap"><span class="qty-label">Mañana</span><input class="qty" type="number" min="0" data-product="Voy x Dos" data-sec="Tartas Troceadas" placeholder="0"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── NOTES ── -->
+<div class="notes-wrap">
+  <div class="section-title" style="background:linear-gradient(90deg,#e8d8cc,#f0e4d8)"><span class="dot" style="background:#c0392b"></span>Observaciones / Notas</div>
+  <textarea class="notes" id="notas" placeholder="Ej: Sin gluten en croissants, entregar antes de las 8h..."></textarea>
+</div>
+
+<!-- ── STICKY FOOTER ── -->
+<div class="sticky-footer">
+  <div class="order-summary">
+    <strong id="count-display">0 productos</strong>
+    <span id="lines-display">seleccionados</span>
+  </div>
+  <button class="btn-confirm" id="btn-confirm" onclick="confirmarPedido()">
+    <span id="btn-text">✓ CONFIRMAR PEDIDO</span>
+    <span id="btn-spinner" class="spinner" style="display:none"></span>
+  </button>
+</div>
+
+<!-- ── TOAST ── -->
+<div id="toast"></div>
+
+<script>
+// ── WEBHOOK CONFIG ─────────────────────────────────────────
+const STORAGE_KEY = 'pastrychef_webhook';
+let webhookUrl = localStorage.getItem(STORAGE_KEY) || '';
+
+window.addEventListener('DOMContentLoaded', () => {
+  const whi = document.getElementById('webhook-input');
+  if (webhookUrl) { whi.value = webhookUrl; }
+
+  // Set default date = tomorrow
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  document.getElementById('fecha').value = tomorrow.toISOString().split('T')[0];
+
+  // Live counter
+  document.querySelectorAll('input.qty').forEach(inp => {
+    inp.addEventListener('input', () => {
+      const v = parseInt(inp.value);
+      inp.classList.toggle('filled', v > 0);
+      updateCounter();
+    });
+  });
+});
+
+function saveWebhook() {
+  const url = document.getElementById('webhook-input').value.trim();
+  if (!url) return;
+  localStorage.setItem(STORAGE_KEY, url);
+  webhookUrl = url;
+  const st = document.getElementById('wh-status');
+  st.style.display = 'inline';
+  setTimeout(() => st.style.display = 'none', 2000);
+}
+
+function updateCounter() {
+  const mananaInputs = document.querySelectorAll('input.qty:not(.hoy)');
+  let total = 0, lines = 0;
+  mananaInputs.forEach(i => {
+    const v = parseInt(i.value) || 0;
+    if (v > 0) { total += v; lines++; }
+  });
+  document.getElementById('count-display').textContent =
+    total > 0 ? `${total} uds. mañana` : '0 productos';
+  document.getElementById('lines-display').textContent =
+    lines > 0 ? `en ${lines} líneas` : 'seleccionados';
+}
+
+// ── CONFIRM ORDER ───────────────────────────────────────────
+async function confirmarPedido() {
+  const cliente = document.getElementById('cliente').value.trim();
+  const fecha   = document.getElementById('fecha').value;
+
+  if (!cliente) { showToast('⚠️ Indica el nombre del cliente', 'error'); return; }
+  if (!fecha)   { showToast('⚠️ Selecciona la fecha de entrega', 'error'); return; }
+
+  const currentWebhook = localStorage.getItem(STORAGE_KEY) ||
+                          document.getElementById('webhook-input').value.trim();
+  if (!currentWebhook) {
+    showToast('⚠️ Configura la URL del webhook n8n arriba', 'error'); return;
+  }
+
+  // Build payload – pair each "hoy" input with its "mañana" sibling
+  const pedido = [];
+  const mananaInputs = document.querySelectorAll('input.qty:not(.hoy)');
+  mananaInputs.forEach(manana => {
+    const hoy = manana.closest('.product').querySelector('input.qty.hoy');
+    const cantHoy    = parseInt(hoy ? hoy.value : 0) || 0;
+    const cantManana = parseInt(manana.value) || 0;
+    if (cantHoy > 0 || cantManana > 0) {
+      pedido.push({
+        seccion:        manana.dataset.sec,
+        producto:       manana.dataset.product,
+        entregado_hoy:  cantHoy,
+        pedido_manana:  cantManana
+      });
+    }
+  });
+
+  if (pedido.length === 0) {
+    showToast('⚠️ No hay ninguna cantidad indicada', 'error'); return;
+  }
+
+  const payload = {
+    cliente:  cliente,
+    codigo:   document.getElementById('codigo').value.trim(),
+    fecha_entrega: fecha,
+    timestamp: new Date().toISOString(),
+    notas:    document.getElementById('notas').value.trim(),
+    total_lineas: pedido.length,
+    total_unidades_hoy:    pedido.reduce((s, p) => s + p.entregado_hoy,  0),
+    total_unidades_manana: pedido.reduce((s, p) => s + p.pedido_manana, 0),
+    pedido
+  };
+
+  // Send
+  const btn = document.getElementById('btn-confirm');
+  btn.disabled = true;
+  document.getElementById('btn-text').textContent = 'Enviando…';
+  document.getElementById('btn-spinner').style.display = 'inline-block';
+
+  try {
+    const res = await fetch(currentWebhook, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    showToast(`✅ Pedido de ${cliente} enviado correctamente`, 'ok');
+    resetForm();
+  } catch (err) {
+    console.error(err);
+    showToast(`❌ Error al enviar: ${err.message}`, 'error');
+  } finally {
+    btn.disabled = false;
+    document.getElementById('btn-text').textContent = '✓ CONFIRMAR PEDIDO';
+    document.getElementById('btn-spinner').style.display = 'none';
+  }
+}
+
+function resetForm() {
+  document.querySelectorAll('input.qty').forEach(i => { i.value = ''; i.classList.remove('filled'); });
+  document.getElementById('cliente').value = '';
+  document.getElementById('codigo').value  = '';
+  document.getElementById('notas').value   = '';
+  updateCounter();
+}
+
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = type === 'error' ? 'error' : '';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3800);
+}
+</script>
+</body>
+</html>
